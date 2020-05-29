@@ -18,6 +18,7 @@
 #import <GoogleSignIn/GIDGoogleUser.h>
 #import <GoogleSignIn/GIDProfileData.h>
 #import <GoogleSignIn/GIDSignIn.h>
+#import <Firebase.h>
 
 #import <memory>
 
@@ -88,6 +89,10 @@ NSRecursiveLock *resultLock = [NSRecursiveLock alloc];
     didSignInForUser:(GIDGoogleUser *)user
            withError:(NSError *)_error {
   if (_error == nil) {
+  GIDAuthentication *authentication = user.authentication;
+  FIRAuthCredential *credential =
+  [FIRGoogleAuthProvider credentialWithIDToken:authentication.idToken
+                                   accessToken:authentication.accessToken];
     if (currentResult_) {
       currentResult_->result_code = kStatusCodeSuccess;
       currentResult_->finished = true;
@@ -104,9 +109,6 @@ NSRecursiveLock *resultLock = [NSRecursiveLock alloc];
         break;
       case kGIDSignInErrorCodeKeychain:
         currentResult_->result_code = kStatusCodeInternalError;
-        break;
-      case kGIDSignInErrorCodeNoSignInHandlersInstalled:
-        currentResult_->result_code = kStatusCodeDeveloperError;
         break;
       case kGIDSignInErrorCodeHasNoAuthInKeychain:
         currentResult_->result_code = kStatusCodeError;
@@ -191,6 +193,7 @@ bool GoogleSignIn_Configure(void *unused, bool useGameSignIn,
     [GIDSignIn sharedInstance].loginHint =
         [NSString stringWithUTF8String:accountName];
   }
+  [GIDSignIn sharedInstance].presentingViewController = UnityGetGLViewController();
 
   return !useGameSignIn;
 }
@@ -239,7 +242,7 @@ void *GoogleSignIn_SignIn() {
 void *GoogleSignIn_SignInSilently() {
   SignInResult *result = startSignIn();
   if (!result) {
-    [[GIDSignIn sharedInstance] signInSilently];
+    [[GIDSignIn sharedInstance] restorePreviousSignIn];
     result = currentResult_.get();
   }
   return result;

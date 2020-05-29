@@ -16,6 +16,7 @@
 
 #import "GoogleSignInAppController.h"
 #import <objc/runtime.h>
+#import <Firebase.h>
 
 // Handles Google SignIn UI and events.
 GoogleSignInHandler *gsiHandler;
@@ -61,22 +62,12 @@ GoogleSignInHandler *gsiHandler;
 
 - (BOOL)GoogleSignInAppController:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-
-  // IMPORTANT: IF you are not supplying a GoogleService-Info.plist in your
-  // project that contains the client id, you need to set the client id here.
-
-  NSString *path = [[NSBundle mainBundle] pathForResource:@"GoogleService-Info"
-                                                   ofType:@"plist"];
-  NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:path];
-  NSString *clientId = [dict objectForKey:@"CLIENT_ID"];
-
-  gsiHandler = [GoogleSignInHandler alloc];
-
-  // Setup the Sign-In instance.
-  GIDSignIn *signIn = [GIDSignIn sharedInstance];
-  signIn.clientID = clientId;
-  signIn.uiDelegate = gsiHandler;
-  signIn.delegate = gsiHandler;
+    [FIRApp configure];
+    
+    gsiHandler = [GoogleSignInHandler alloc];
+    
+    [GIDSignIn sharedInstance].clientID = [FIRApp defaultApp].options.clientID;
+    [GIDSignIn sharedInstance].delegate = gsiHandler;
 
   // looks like it's just calling itself, but the implementations were swapped
   // so we're actually calling the original once we're done
@@ -96,10 +87,7 @@ GoogleSignInHandler *gsiHandler;
                                sourceApplication:sourceApplication
                                       annotation:annotation];
 
-  return [[GIDSignIn sharedInstance] handleURL:url
-                             sourceApplication:sourceApplication
-                                    annotation:annotation] ||
-         handled;
+  return [[GIDSignIn sharedInstance] handleURL:url ] || handled;
 }
 
 /**
@@ -112,13 +100,7 @@ GoogleSignInHandler *gsiHandler;
   BOOL handled =
       [self GoogleSignInAppController:app openURL:url options:options];
 
-  return [[GIDSignIn sharedInstance]
-                     handleURL:url
-             sourceApplication:
-                 options[UIApplicationOpenURLOptionsSourceApplicationKey]
-                    annotation:
-                        options[UIApplicationOpenURLOptionsAnnotationKey]] ||
-         handled;
+  return [[GIDSignIn sharedInstance] handleURL:url ] || handled;
 }
 
 @end

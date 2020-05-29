@@ -15,6 +15,6 @@
  */
 #import <GoogleSignIn/GIDSignIn.h>
 @interface GoogleSignInHandler
-    : NSObject <GIDSignInDelegate, GIDSignInUIDelegate>
+    :  UIResponder<UIApplicationDelegate, GIDSignInDelegate>
 
 @end
