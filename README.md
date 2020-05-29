@@ -4,7 +4,7 @@ _Copyright (c) 2017 Google Inc. All rights reserved._
 
 ## Updates Notes
 - Update codes based on https://firebase.google.com/docs/auth/ios/google-signin#objective-c_6
-- Tested with `firebase_unity_sdk_6.14.1`
+- Tested with `firebase_unity_sdk_6.14.1` and `Unity 2019.3.14f1`
 - After build, when importing package do not import `Parse` and `PlayServiceResolver`.
 
 ## Overview
